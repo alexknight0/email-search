@@ -1,0 +1,25 @@
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.4 system-ui, sans-serif; background: #fafafa; color: #222; }
+header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #ddd; }
+h1 { font-size: 18px; margin: 0; }
+#count { margin-left: auto; color: #666; font-size: 13px; }
+.home-link { text-decoration: none; font-size: 22px; color: #222; padding: 4px 8px; margin: -4px -4px -4px -8px; }
+#load, main { max-width: 860px; margin: 0 auto; padding: 16px; }
+.bar { display: flex; gap: 8px; flex-wrap: wrap; }
+#q { flex: 1 1 260px; font-size: 16px; padding: 10px 12px; border: 1px solid #bbb; border-radius: 8px; }
+select { font-size: 15px; padding: 8px; border: 1px solid #bbb; border-radius: 8px; background: #fff; }
+#summary { color: #666; font-size: 13px; margin: 10px 0 4px; }
+#results { list-style: none; margin: 0; padding: 0; }
+.mail { background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; padding: 10px 12px; margin: 8px 0; cursor: pointer; overflow-wrap: anywhere; }
+.mail .top { display: flex; gap: 8px; align-items: baseline; }
+.mail .subj { font-weight: 600; flex: 1; }
+.mail .date { color: #666; font-size: 13px; white-space: nowrap; }
+.mail .who { color: #444; font-size: 14px; }
+.mail .snip { color: #555; font-size: 14px; margin-top: 4px; }
+.mail .tag { font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #e8eefc; color: #234; margin-right: 6px; }
+.mail .tag.uq { background: #fbe9d9; }
+.mail.open .snip { white-space: pre-wrap; color: #222; }
+mark { background: #fff1a8; }
+#more, .link { font-size: 15px; padding: 8px 14px; border-radius: 8px; border: 1px solid #bbb; background: #fff; }
+.link { border: 0; background: none; color: #06c; padding: 0; }

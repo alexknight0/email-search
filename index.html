@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email search</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a class="home-link" href="../home/" aria-label="Home">⌂</a>
+  <h1>Email search</h1>
+  <span id="count"></span>
+</header>
+
+<section id="load">
+  <p>Your emails never leave this device. Pick the <code>emails.json</code> file made by
+  <code>tools/build_index.py</code>. It is stored in this browser, so you only do this once.</p>
+  <input type="file" id="file" accept=".json,application/json">
+  <p id="load-status"></p>
+</section>
+
+<main id="app" hidden>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Search subject, people and text" autocomplete="off" autofocus>
+    <select id="source">
+      <option value="">Gmail + UQ</option>
+      <option value="Gmail">Gmail</option>
+      <option value="UQ">UQ</option>
+    </select>
+    <select id="sort">
+      <option value="rank">Best match</option>
+      <option value="new">Newest</option>
+      <option value="old">Oldest</option>
+    </select>
+  </div>
+  <p id="summary"></p>
+  <ol id="results"></ol>
+  <button id="more" hidden>Show more</button>
+  <p><button id="reset" class="link">Load a different file</button></p>
+</main>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
