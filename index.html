@@ -14,9 +14,8 @@
 </header>
 
 <section id="load">
-  <p>Your emails never leave this device. Pick the <code>emails.json</code> file made by
-  <code>tools/build_index.py</code>. It is stored in this browser, so you only do this once.</p>
-  <input type="file" id="file" accept=".json,application/json">
+  <p>Sign in with the owner's Google account to load the emails. They are kept in this browser afterwards.</p>
+  <button id="signin">Sign in with Google</button>
   <p id="load-status"></p>
 </section>
 
@@ -37,7 +36,7 @@
   <p id="summary"></p>
   <ol id="results"></ol>
   <button id="more" hidden>Show more</button>
-  <p><button id="reset" class="link">Load a different file</button></p>
+  <p><button id="signout" class="link" hidden>Sign out and remove emails from this browser</button></p>
 </main>
 
 <script type="module" src="app.js"></script>

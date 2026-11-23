@@ -21,5 +21,5 @@ select { font-size: 15px; padding: 8px; border: 1px solid #bbb; border-radius: 8
 .mail .tag.uq { background: #fbe9d9; }
 .mail.open .snip { white-space: pre-wrap; color: #222; }
 mark { background: #fff1a8; }
-#more, .link { font-size: 15px; padding: 8px 14px; border-radius: 8px; border: 1px solid #bbb; background: #fff; }
+#more, #signin, .link { font-size: 15px; padding: 8px 14px; border-radius: 8px; border: 1px solid #bbb; background: #fff; }
 .link { border: 0; background: none; color: #06c; padding: 0; }

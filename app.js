@@ -1,4 +1,20 @@
 import MiniSearch from "https://cdn.jsdelivr.net/npm/minisearch@7.2.0/dist/es/index.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import {
+  initializeAuth, browserLocalPersistence, browserPopupRedirectResolver, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut,
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore-lite.js";
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC7xqykvaKbyWjJw90NJFym29llPQjQjdU",
+  authDomain: "email-search-8ea7e1.firebaseapp.com",
+  projectId: "email-search-8ea7e1",
+  appId: "1:818446598641:web:c76016af45483fe26bc450",
+};
+const app = initializeApp(FIREBASE_CONFIG);
+// Sign-in lives in localStorage, not Firebase's shared IndexedDB (all of Alex's sites share one origin).
+const auth = initializeAuth(app, { persistence: browserLocalPersistence, popupRedirectResolver: browserPopupRedirectResolver });
+const db = getFirestore(app);
 
 const DB_NAME = "email-search";
 const STORE = "kv";
@@ -30,7 +46,7 @@ async function dbRun(mode, fn) {
   });
 }
 
-const saveDocs = (list) => dbRun("readwrite", (s) => s.put(list, "docs"));
+const saveDocs = (value) => dbRun("readwrite", (s) => s.put(value, "docs"));
 const loadDocs = () => dbRun("readonly", (s) => s.get("docs"));
 const clearDocs = () => dbRun("readwrite", (s) => s.delete("docs"));
 
@@ -136,24 +152,72 @@ $("source").addEventListener("change", run);
 $("sort").addEventListener("change", run);
 $("more").addEventListener("click", more);
 
-$("file").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  $("load-status").textContent = "Reading file…";
-  try {
-    const list = JSON.parse(await file.text());
-    $("load-status").textContent = "Saving in this browser…";
-    await saveDocs(list);
-    build(list);
-  } catch (err) {
-    $("load-status").textContent = `Could not load that file: ${err.message}`;
-  }
-});
+async function gunzip(bytes) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(stream).text());
+}
 
-$("reset").addEventListener("click", async () => {
+// Downloads every chunk from Firestore when the stored version differs from the cached one.
+async function sync(cachedVersion) {
+  const meta = await getDoc(doc(db, "meta", "index"));
+  if (!meta.exists()) throw new Error("No emails have been uploaded yet. Run tools/upload.py.");
+  const { version, chunks } = meta.data();
+  if (version === cachedVersion) return null;
+  $("load-status").textContent = `Downloading ${chunks} chunks…`;
+  const snap = await getDocs(collection(db, "emails"));
+  const parts = snap.docs.sort((a, b) => a.id.localeCompare(b.id));
+  const list = [];
+  for (const [i, d] of parts.entries()) {
+    $("load-status").textContent = `Unpacking ${i + 1}/${parts.length}…`;
+    list.push(...(await gunzip(d.data().data.toUint8Array())));
+  }
+  await saveDocs({ version, list });
+  return list;
+}
+
+function showSignIn(message) {
+  $("signin").hidden = false;
+  $("load-status").textContent = message || "";
+}
+
+let cachedVersion = null;
+async function start() {
+  const saved = await loadDocs();
+  if (saved && saved.list) {
+    cachedVersion = saved.version;
+    build(saved.list);
+  }
+  onAuthStateChanged(auth, async (user) => {
+    $("signout").hidden = !user;
+    if (!user) {
+      if (!engine) showSignIn();
+      return;
+    }
+    $("signin").hidden = true;
+    try {
+      const fresh = await sync(cachedVersion);
+      if (fresh) {
+        cachedVersion = (await loadDocs()).version;
+        build(fresh);
+      } else if (!engine) {
+        build((await loadDocs()).list);
+      }
+      $("load-status").textContent = "";
+    } catch (err) {
+      const denied = err.code === "permission-denied";
+      showSignIn(denied ? `${user.email} doesn't have access. Sign out and use the owner's account.` : `Could not load emails: ${err.message}`);
+      $("signout").hidden = false;
+    }
+  });
+}
+
+$("signin").addEventListener("click", () =>
+  signInWithPopup(auth, new GoogleAuthProvider()).catch((err) => showSignIn(`Sign-in failed: ${err.message}`)),
+);
+$("signout").addEventListener("click", async () => {
+  await signOut(auth);
   await clearDocs();
   location.reload();
 });
 
-const saved = await loadDocs();
-if (saved && saved.length) build(saved);
+start();
